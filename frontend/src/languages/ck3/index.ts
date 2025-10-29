@@ -33,7 +33,36 @@ const scopeDefinitions: Record<string, CK3ScopeDefinition> = Object.fromEntries(
 
 const escapeForRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+export const logicalOperatorCanonicalForms: Record<string, string> = {
+  always: 'always',
+  and: 'AND',
+  or: 'OR',
+  not: 'NOT',
+  nor: 'NOR',
+  nand: 'NAND',
+  all_false: 'all_false',
+  any_false: 'any_false',
+  switch: 'switch',
+  trigger_if: 'trigger_if',
+  trigger_else_if: 'trigger_else_if',
+  trigger_else: 'trigger_else'
+};
+
+export const booleanCanonicalForms: Record<string, string> = {
+  yes: 'yes',
+  no: 'no'
+};
+
 const keywordPattern = new RegExp(`\\b(${topLevelScopes.map(escapeForRegExp).join('|')})\\b`);
+const logicalOperatorPattern = new RegExp(
+  `\\b(${Object.keys(logicalOperatorCanonicalForms).map(escapeForRegExp).join('|')})\\b`,
+  'i'
+);
+const booleanPattern = new RegExp(
+  `\\b(${Object.keys(booleanCanonicalForms).map(escapeForRegExp).join('|')})\\b`,
+  'i'
+);
+const comparisonOperatorPattern = /(<=|>=|!=|=|<|>)/;
 let registered = false;
 
 const fieldNames = Object.values(scopeDefinitions)
@@ -69,6 +98,9 @@ export const registerCK3Language = (monaco: typeof Monaco) => {
       root: [
         [/\s+/, 'white'],
         [/#.*$/, 'comment'],
+        [logicalOperatorPattern, 'keyword.logical'],
+        [booleanPattern, 'constant.boolean'],
+        [comparisonOperatorPattern, 'operator.comparison'],
         [/\b\d+\b/, 'number'],
         [keywordPattern, 'keyword'],
         [
@@ -80,6 +112,17 @@ export const registerCK3Language = (monaco: typeof Monaco) => {
         [/"([^\\"\n]|\\.)*"/, 'string']
       ]
     }
+  });
+
+  monaco.editor.defineTheme('ck3-dark', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'keyword.logical', foreground: '7FDBFF' },
+      { token: 'constant.boolean', foreground: '2ECC71' },
+      { token: 'operator.comparison', foreground: 'FF6B6B' }
+    ],
+    colors: {}
   });
 
   const topLevelSuggestions = topLevelScopes.map((scopeName) => ({
