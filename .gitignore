@@ -1,17 +1,18 @@
-# Node
-frontend/node_modules
-frontend/.next
-
 # Python
-backend/.venv
-__pycache__
-*.pyc
+__pycache__/
+*.py[cod]
+.venv/
 
-# Env
-.env
-backend/.env
+# Node
+node_modules/
+dist/
 
-# Editor
-.vscode
-.idea
+# Editors
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+
+# Storage outputs
+storage/

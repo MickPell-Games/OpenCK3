@@ -1,13 +1,6 @@
-from fastapi import FastAPI
-from .api.routes import router as api_router
-from .core.config import get_settings
+"""ASGI entrypoint for OpenCK3."""
+from __future__ import annotations
 
-settings = get_settings()
+from .api import app
 
-app = FastAPI(title="OpenCK3 Backend", openapi_url=f"{settings.api_base_path}/openapi.json")
-app.include_router(api_router, prefix=settings.api_base_path)
-
-
-@app.get("/health", tags=["Health"])
-def health_check() -> dict[str, str]:
-    return {"status": "ok"}
+__all__ = ["app"]
