@@ -1,80 +1,38 @@
-# OpenCK3
+# OpenCK3 Developer Toolkit
 
-OpenCK3 streamlines the process of packaging Crusader Kings III mods by collecting
-project files, normalising art/audio assets, and producing CK3-compatible ZIP
-archives that can be staged for the Steam Workshop. The repository ships with a
-FastAPI backend for asset ingestion and build orchestration together with a
-React-based publishing dashboard.
+This repository houses the foundations for the OpenCK3 modding toolkit, including
+both a modern web frontend and a FastAPI backend service.
 
-## Features
+## Project Structure
 
-- **Structured storage** – Texture and audio uploads are written to
-  `storage/assets/dds/` and `storage/assets/audio/`, preserving per-project
-  metadata for later builds.
-- **Automated builds** – The build service converts source textures to DDS via
-  ImageMagick (`magick`/`convert`) or Microsoft's `texconv`, packages validated
-  audio tracks, generates a `descriptor.mod`, and emits a CK3-ready ZIP.
-- **Publishing dashboard** – The frontend guides mod authors through uploading
-  assets, triggering builds, monitoring progress, and staging uploads for the
-  Steam Workshop.
+```
+.
+├── backend/              # FastAPI service for metadata, assets, and build pipelines
+├── frontend/             # Next.js + TypeScript application
+├── .env.example          # Shared environment variables for local development
+├── .eslintrc.json        # Shared linting configuration
+└── .prettierrc           # Shared formatting configuration
+```
 
-## Requirements
+## Prerequisites
 
-- Python 3.11+
 - Node.js 18+
-- One of the following external texture conversion tools installed on the
-  backend host and available on `$PATH`:
-  - [ImageMagick](https://imagemagick.org) 7+ (`magick` or `convert` command)
-  - [texconv](https://github.com/microsoft/DirectXTex/wiki/Texconv) from the
-    DirectXTex suite
-- Optional (for actual Steam publishing): the Steam client and the Crusader
-  Kings III Workshop tools.
+- npm 9+ or pnpm/yarn (examples use npm)
+- Python 3.11+
+- Docker (optional, for containerised backend)
 
-## Backend
+## Environment Variables
 
-The FastAPI app lives in `backend/app`. Key modules:
-
-- `build.py` – Build service and asynchronous job manager.
-- `api.py` – HTTP endpoints for asset uploads, build orchestration, and
-  Workshop staging.
-- `storage.py` – Helpers for maintaining the storage directory layout.
-
-Create a virtual environment and install dependencies (FastAPI & Uvicorn):
+Copy the example environment file and adjust values as needed:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install fastapi uvicorn python-multipart
+cp .env.example .env
 ```
 
-Run the API server:
+The frontend consumes `NEXT_PUBLIC_API_BASE_URL` for API calls, and the backend
+reads `STORAGE_PATH`, `BUILD_OUTPUT_PATH`, and `API_BASE_PATH`.
 
-```bash
-uvicorn backend.app.main:app --reload
-```
-
-Uploads are stored beneath `storage/` with the following structure:
-
-```
-storage/
-  assets/
-    dds/<project-id>/<asset-name>
-    audio/<project-id>/<track>
-  builds/<project-id>-<timestamp>.zip
-  projects/<project-id>/...
-  workshop/<artifact>.zip
-```
-
-Texture metadata must include a `usage` field, while audio uploads require both
-`title` and `composer`. Build jobs expose progress and status through the
-`/builds/{job_id}` endpoint and completed archives can be downloaded from
-`/builds/{job_id}/download`.
-
-## Frontend
-
-The publishing dashboard is implemented with Vite + React in `frontend/`.
-
-Install dependencies and start the dev server:
+## Frontend (Next.js)
 
 ```bash
 cd frontend
@@ -82,23 +40,56 @@ npm install
 npm run dev
 ```
 
-By default the frontend expects the backend at `http://localhost:8000`. Provide
-`VITE_API_BASE` in a `.env` file to customise the API origin.
+The development server defaults to http://localhost:3000 with routes for:
 
-The workflow component (`src/components/PublishingWorkflow.tsx`) lets authors:
+- `/dashboard` – project overview and build activity
+- `/mod-editor` – metadata and script editing workspace
+- `/assets` – asset upload and management
+- `/publishing` – release workflow overview
 
-1. Upload textures and audio tracks with validation.
-2. Trigger builds and watch progress updates in real time.
-3. Download the resulting ZIP or stage it for Steam Workshop upload.
+Additional scripts:
 
-Workshop uploads are simulated by copying the completed archive to
-`storage/workshop/`. Integrating with Valve's publishing APIs requires the Steam
-command line tools and adherence to Valve's Workshop terms of service.
+- `npm run build` – create a production build
+- `npm run start` – run the production build locally
+- `npm run lint` – lint the codebase using ESLint
 
-## Licensing considerations
+## Backend (FastAPI)
 
-Ensure all uploaded textures and audio clips are cleared for redistribution.
-Mods uploaded to the Steam Workshop must comply with Paradox Interactive's mod
-policy and Valve's subscriber agreement. ImageMagick is distributed under the
-Apache 2.0 license, while `texconv` ships under the MIT license—verify that your
-usage respects these licences alongside any third-party asset restrictions.
+### Local development
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+The API will be available at http://localhost:8000 with routes under `/api` for
+mods, assets, and build operations.
+
+### Docker
+
+```bash
+cd backend
+docker build -t openck3-backend .
+docker run --rm -it -p 8000:8000 --env-file ../.env openck3-backend
+```
+
+## Formatting & Linting
+
+- ESLint is configured via `.eslintrc.json` and scoped to the frontend directory.
+- Prettier formatting is shared across the repository with `.prettierrc`.
+
+Run the lint command from the `frontend/` directory:
+
+```bash
+cd frontend
+npm run lint
+```
+
+## Future Improvements
+
+- Persist data via a database or object storage provider.
+- Integrate authentication and role-based access control.
+- Expand build orchestration with background workers.

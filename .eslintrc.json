@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "ignorePatterns": ["node_modules", "dist", "build"],
+  "overrides": [
+    {
+      "files": ["frontend/**/*.{ts,tsx,js,jsx}"],
+      "extends": ["next/core-web-vitals"],
+      "parserOptions": {
+        "project": "./frontend/tsconfig.json"
+      }
+    }
+  ]
+}

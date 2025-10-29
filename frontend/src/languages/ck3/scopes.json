@@ -1,0 +1,32 @@
+{
+  "topLevel": ["character", "title", "province", "modifier"],
+  "character": {
+    "fields": [
+      { "name": "id", "type": "string", "required": true },
+      { "name": "culture", "type": "string" },
+      { "name": "faith", "type": "string" },
+      { "name": "traits", "type": "array" }
+    ]
+  },
+  "title": {
+    "fields": [
+      { "name": "id", "type": "string", "required": true },
+      { "name": "holder", "type": "string" },
+      { "name": "rank", "type": "enum", "values": ["baron", "count", "duke", "king", "emperor"] }
+    ]
+  },
+  "province": {
+    "fields": [
+      { "name": "id", "type": "string", "required": true },
+      { "name": "terrain", "type": "enum", "values": ["plains", "hills", "mountains", "desert", "forest"] },
+      { "name": "buildings", "type": "array" }
+    ]
+  },
+  "modifier": {
+    "fields": [
+      { "name": "id", "type": "string", "required": true },
+      { "name": "duration", "type": "integer" },
+      { "name": "effects", "type": "array" }
+    ]
+  }
+}
