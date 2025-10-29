@@ -11,8 +11,12 @@ import type { AssetRecord, BuildJob } from "../types";
 
 const POLL_INTERVAL = 3000;
 
-function PublishingWorkflow() {
-  const [projectId, setProjectId] = useState("my-mod");
+interface PublishingWorkflowProps {
+  projectId?: string;
+}
+
+function PublishingWorkflow({ projectId: initialProjectId = "my-mod" }: PublishingWorkflowProps) {
+  const [projectId, setProjectId] = useState(initialProjectId);
   const [textureFile, setTextureFile] = useState<File | null>(null);
   const [textureUsage, setTextureUsage] = useState("interface icon");
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -25,6 +29,10 @@ function PublishingWorkflow() {
   const [assetLog, setAssetLog] = useState<string[]>([]);
   const [visibility, setVisibility] = useState("private");
   const [isWorkshopUploadPending, setIsWorkshopUploadPending] = useState(false);
+
+  useEffect(() => {
+    setProjectId(initialProjectId);
+  }, [initialProjectId]);
 
   useEffect(() => {
     if (!job || !isPolling) {
